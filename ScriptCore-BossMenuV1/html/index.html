@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScriptCore.dk - Boss Menu - Version 1.0.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body style="display: none;">
+
+<div class="bmsc-container">
+    <div class="bmsc-screen">
+        <div id="notification-container"></div>
+
+        <div class="status-bar">
+            <span id="current-time">00:00</span>
+            <div class="status-icons">
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+
+        <div class="bmsc-layout">
+            <nav class="bmsc-sidebar">
+                <div class="sidebar-header">  BossMenu</div>
+                <div class="sidebar-links">
+                    <a href="#" class="nav-link active" onclick="openTab('dashboard')">
+                        <i class="fas fa-home"></i> <span data-i18n="navDashboard">Oversigt</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openTab('bank')">
+                        <i class="fas fa-university"></i> <span data-i18n="navBank">Økonomi</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openTab('employees')">
+                        <i class="fas fa-users"></i> <span data-i18n="navEmployees">Ansatte</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openTab('ranks')">
+                        <i class="fas fa-layer-group"></i> <span data-i18n="navRanks">Rangstyring</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openTab('logs')">
+                        <i class="fas fa-clipboard-list"></i> <span data-i18n="navLogs">Logs</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openTab('system')">
+                        <i class="fas fa-cog"></i> <span data-i18n="navSettings">Indstillinger</span>
+                    </a>
+                </div>
+                <div class="sidebar-footer">
+                    <small>https://discord.gg/ScriptCore-dk</small>
+                </div>
+            </nav>
+
+            <main class="bmsc-main-content">
+                
+                <div id="dashboard" class="tab-content active">
+                    <h2 id="welcome-user">Velkommen,</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="card-icon"><i class="fas fa-wallet"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value money" id="dash-money">0 kr.</span><br>
+                                <small data-i18n="accountSmall">Konto</small>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="card-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="dash-online">0 Online</span><br>
+                                <small data-i18n="employeesSmall">Ansatte</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-logs">
+                        <div class="section-title-row">
+                            <h2 data-i18n="latestLogs">Seneste Logs</h2>
+                            <button class="btn btn-ghost" onclick="openTab('logs')" data-i18n="seeAllLogs">Se alle</button>
+                        </div>
+                        <div id="dashboard-logs-content" class="logs-list compact"></div>
+                    </div>
+
+                </div>
+
+                <div id="bank" class="tab-content">
+                    <h2 data-i18n="account">Konto</h2>
+                    <div class="stat-card">
+                        <div class="card-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value money" id="bank-balance">0 kr.</span><br>
+                            <small data-i18n="balance">Saldo</small>
+                        </div>
+                    </div>
+                    <div class="bank-controls" style="margin-top: 20px;">
+                        <input type="number" id="bank-amount" class="styled-input" data-i18n-placeholder="amountPlaceholder" placeholder="Indtast beløb...">
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button class="btn btn-success" onclick="handleBank('deposit')" style="flex:1;" data-i18n="deposit">Indsæt</button>
+                            <button class="btn btn-danger" onclick="handleBank('withdraw')" style="flex:1;" data-i18n="withdraw">Hæv</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="employees" class="tab-content">
+                    <h2 data-i18n="hireNew">Ansæt ny Person</h2>
+                    <div class="stat-card" style="flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 30px;">
+                        <input type="number" id="new-emp-id" class="styled-input" data-i18n-placeholder="serverIdPlaceholder" placeholder="Server ID...">
+                        <select id="new-emp-rank" class="styled-input"></select>
+                        <button class="btn btn-success" onclick="hireEmployee()" style="width:100%;" data-i18n="hirePerson">Ansæt Person</button>
+                    </div>
+                    
+                    <h2 data-i18n="employeeOverview">Ansatte Oversigt</h2>
+                    <div id="employee-list-content" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+
+                <div id="ranks" class="tab-content">
+                    <h2 data-i18n="addRank">Tilføj rang</h2>
+                    <div class="stat-card" style="flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 25px;">
+                        <input type="number" id="rank-grade" class="styled-input" data-i18n-placeholder="rankNumberPlaceholder" placeholder="Rang nummer fx 0, 1, 2, 3...">
+                        <input type="text" id="rank-label" class="styled-input" data-i18n-placeholder="rankNamePlaceholder" placeholder="Rang navn fx Indsatsleder">
+                        <input type="number" id="rank-salary" class="styled-input" data-i18n-placeholder="salaryPlaceholder" placeholder="Løn fx 4500" value="0">
+                        <button class="btn btn-success" onclick="createRank()" style="width:100%;" data-i18n="addRankBtn">Tilføj rang</button>
+                    </div>
+
+                    <h2 data-i18n="ranksTitle">Rangs</h2>
+                    <div id="ranks-list-content" style="display: flex; flex-direction: column; gap: 15px;"></div>
+                </div>
+
+
+                <div id="logs" class="tab-content">
+                    <div class="section-title-row">
+                        <h2 data-i18n="allLogs">Alle Logs</h2>
+                        <button class="btn btn-ghost" onclick="refreshBossData()" data-i18n="refresh">Opdater</button>
+                    </div>
+                    <div id="logs-list-content" class="logs-list"></div>
+                </div>
+
+                <div id="system" class="tab-content">
+                    <h2 data-i18n="settingsTitle">Indstillinger</h2>
+
+                    <div class="settings-box">
+                        <label data-i18n="language">Sprog</label>
+                        <div class="language-switch">
+                            <button id="lang-dk" class="lang-pill active" onclick="setLanguage('dk')">DK</button>
+                            <button id="lang-en" class="lang-pill" onclick="setLanguage('en')">EN</button>
+                        </div>
+                    </div>
+                    <div class="settings-box">
+                        <label><span data-i18n="size">Størrelse</span>: <span id="size-percent">100%</span></label>
+                        <input type="range" id="range-size" min="0.5" max="1.2" step="0.01" value="1" class="modern-slider">
+                    </div>
+                    <div class="settings-box">
+                        <label><span data-i18n="brightness">Lysstyrke</span>: <span id="brightness-percent">100%</span></label>
+                        <input type="range" id="range-brightness" min="50" max="100" step="1" value="100" class="modern-slider">
+                    </div>
+                    <div class="settings-box">
+                        <label><span data-i18n="opacity">Gennemsigtighed</span>: <span id="opacity-percent">100%</span></label>
+                        <input type="range" id="range-opacity" min="0.2" max="1.0" step="0.01" value="1" class="modern-slider">
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div class="home-indicator" onclick="closeUI()"></div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
